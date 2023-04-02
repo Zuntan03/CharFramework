@@ -3,7 +3,7 @@
 rem Configuration
 set SD_SCRIPTS_DIR=%~dp0sd-scripts
 set MODEL_DIR=%~dp0LoRAInput
-rem set VAE_DIR=%~dp0LoRAInput
+set VAE_DIR=%~dp0LoRAInput
 set SRC_DIR=%~dp0LoRAInput
 set OUT_DIR=%~dp0LoRAOutput
 set LOG_DIR=%~dp0LoRALog
@@ -58,9 +58,9 @@ set PRETRAINED_MODEL="%MODEL_DIR%\%1"
 echo pretrained_model %PRETRAINED_MODEL%
 shift /1
 
-rem set VAE="%VAE_DIR%\%1"
-rem echo vae %VAE%
-rem shift /1
+set VAE="%VAE_DIR%\%1"
+echo vae %VAE%
+shift /1
 
 set CLIP_SKIP=%1
 echo clip_skip %CLIP_SKIP%
@@ -237,6 +237,7 @@ accelerate launch train_network.py^
  --output_dir=%OUTPUT_DIR%^
  --output_name=%OUTPUT_NAME%^
  --pretrained_model_name_or_path=%PRETRAINED_MODEL%^
+ --vae=%VAE%^
  --clip_skip=%CLIP_SKIP%^
  %NETWORK_WEIGHTS%^
  --logging_dir=%LOGGING_DIR%^
@@ -249,7 +250,6 @@ accelerate launch train_network.py^
  --persistent_data_loader_workers^
  --seed=31337
 @echo off
-rem --vae=%VAE%^
 rem --save_every_n_epochs=1^
 rem --max_token_length=150^
 rem --num_cpu_threads_per_process 4^

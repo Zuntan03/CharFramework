@@ -24,17 +24,28 @@ class CharTagGenerator {
 		}
 		$status = "`r`n$fileName.png ";
 
-		$dirName = [System.IO.Path]::GetFileName([System.IO.Path]::GetDirectoryName($pngPath));
-		$keyword = $dirName;
-		$delIdx = $dirName.IndexOf(" ");
+		$keywords = [System.IO.Path]::GetFileName([System.IO.Path]::GetDirectoryName($pngPath));
+		$delIdx = $keywords.IndexOf("_");
+		if ($delIdx -ge 0) { $keywords = $keywords.Substring(0, $delIdx); }
+
+		$firstKeyword = "";
+		$delIdx = $keywords.IndexOf(",");
 		if ($delIdx -ge 0) {
-			$keyword = $dirName.Substring(0, $delIdx);
+			$firstKeyword = $keywords.Substring(0, $delIdx);
+			$keywords = $keywords.Substring($delIdx, $keywords.Length - $delIdx);
 		}
 		else {
-			$delIdx = $dirName.IndexOf("_");
-			if ($delIdx -ge 0) { $keyword = $dirName.Substring(0, $delIdx); }
+			$firstKeyword = $keywords;
+			$keywords = "";
 		}
-		$status += "$($keyword): ";
+
+		$delIdx = $firstKeyword.IndexOf(" ");
+		if ($delIdx -ge 0) {
+			$firstKeyword = $firstKeyword.Substring(0, $delIdx);
+		}
+		$keywords = $firstKeyword + $keywords;
+
+		$status += "$($keywords): ";
 
 
 		$faceTag = $fileName[0] -eq "f";
@@ -73,9 +84,8 @@ class CharTagGenerator {
 
 		$tags = "";
 
-		if (![string]::IsNullOrEmpty($keyword)) { $tags += "$keyword, "; }
+		if (![string]::IsNullOrEmpty($keywords)) { $tags += "$keywords, "; }
 		$tags += "white background, black background, simple background";
-		if ($faceTag) { $tags += ", fully clothed"; }
 
 		if ($fromHorizontal) { $tags += ", from horizontal"; }
 		if ($fromAbove) { $tags += ", from above"; }

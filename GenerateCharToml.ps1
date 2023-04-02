@@ -3,7 +3,8 @@
 	$RESOLUTIONS = @(512, 768, 1024);
 	$RESOLUTION_NAMES = @("LOW", "MID", "HIGH");
 	$BATCH_SIZE_TABLE = @{
-		"LOW_LOW" = 4; "MID_LOW" = 3; "LOW_MID" = 3; "MID_MID" = 2; "HIGH_LOW" = 2; "LOW_HIGH" = 2; # VRAM 12GB
+		"LOW_LOW" = 2;
+		#"LOW_LOW" = 4; "MID_LOW" = 3; "LOW_MID" = 3; "MID_MID" = 2; "HIGH_LOW" = 2; "LOW_HIGH" = 2; # VRAM 12GB
 	};
 	$MULTI_RESOLUTION = $true; # $false > $SINGLE_RESOLUTION_NAME only
 	$SINGLE_RESOLUTION_NAME = "LOW_LOW";
@@ -159,8 +160,10 @@
 
 				$dirName = [System.IO.Path]::GetFileName($iamge_dir);
 				$class_tokens = $dirName;
-				$delIdx = $dirName.IndexOf("_");
-				if ($delIdx -ge 0) { $class_tokens = $dirName.Substring(0, $delIdx); }
+				$delIdx = $class_tokens.IndexOf("_");
+				if ($delIdx -ge 0) { $class_tokens = $class_tokens.Substring(0, $delIdx); }
+				$delIdx = $class_tokens.IndexOf(",");
+				if ($delIdx -ge 0) { $class_tokens = $class_tokens.Substring(0, $delIdx); }
 				$toml += "class_tokens = '$class_tokens'`r`n";
 
 				$flip_aug = $this.DEFAULT_FLIP_AUG;

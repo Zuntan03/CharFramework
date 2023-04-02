@@ -212,7 +212,6 @@ AI画像生成以外のツール・ゲーム・手書きといった手段で画
 		- white backgroundやblack backgroundを、コンテンツ制作では使わない想定です。
 	- 色が最大限異なる背景タグを合わせて指定することで、学習が強化されて背景タグに背景をより吸い取ってもらえているような気もしますが、気のせいかもしれません。AI「なんやこの背景は？ワイの知っとるwhite backgroundと全然違う！？しっかり学ばな！！」的な？？
 	![BlackWhiteBG](./image/BlackWhiteBG.png)
-1. 「f??」なら上記と同じ理由で裸の影響を減らせるかも？と「fully clothed」。要検証。
 1. 「f0?」なら「from horizontal」、「f1?」なら「from above」、「f2?」なら「from below」
 1. 「f?\[01]」なら「from front」、「f?2」なら「from side」、「f?\[34]」なら「from behind」
 1. 「upper body」
@@ -307,7 +306,7 @@ ControlNetも同様にhedを使用します。
 顔画像の自動タグ付けから「f??」を「b??」に読み替えて一部を変更します。
 
 - 6.の「upper body」を「full body」に変更
-- 全裸が前提となっている3.と、8.から11.の削除
+- 全裸が前提となっている、7.から10.の削除
 
 仕様については生成されたタグテキストや「/GenerateCharTag.ps1」を確認すると確実です。
 もちろんps1を書き換えて好みのタグを生成することも可能です。
@@ -356,12 +355,17 @@ LoRAで複数キャラを取り扱う方法が増えてきたので、一通り�
 フォルダ名とファイル名から自動でタグ付けします。
 
 - ファイル名やフォルダ名から学習用のタグを自動生成
-- キーワードは画像が入っているフォルダ名の先頭
+	- キーワードは画像が入っているフォルダ名の先頭
+	- フォルダ名のアンダーバーより前をカンマで区切ったタグとして追加
+		- ただし最初のタグはスペースより前をタグ、スペース以降をまとめてclass_tokensとして扱う
+	- フォルダ名が「kuronekomimi girl, shorthair, choker, ahoge_f0768/」の場合
+		- フォルダ内の画像に追加されるタグ: kuronekomimi, shorthair, choker, ahoge
+		- tomlのclass_tokens: kuronekomimi girl
 - 複数フォルダのドラッグ＆ドロップが可能
 
 自動生成したタグの例（全裸上半身の正面からの絵）
 ```
-krnk, white background, black background, simple background, fully clothed, from horizontal, from front, upper body, standing, straight standing, nude, completely nude, bare shoulders, nipples, collarbone, abs, ribs, looking at viewer, smile, open mouth, blush
+krnk, white background, black background, simple background, from horizontal, from front, upper body, standing, straight standing, nude, completely nude, bare shoulders, nipples, collarbone, abs, ribs, looking at viewer, smile, open mouth, blush
 ```
 
 ## GenerateCharToml.bat
@@ -369,7 +373,21 @@ krnk, white background, black background, simple background, fully clothed, from
 フォルダ名と画像ファイルから自動で学習用設定ファイルを生成します。
 
 - GenerateCharToml.ps1の先頭にコンフィグあり
+	- デフォルトでは512x512でバッチ2にしかしない
+		- VRAM12GならGenerateCharToml.ps1を次のように書き換える
+```ps1
+$BATCH_SIZE_TABLE = @{
+	"LOW_LOW" = 2;
+	#"LOW_LOW" = 4; "MID_LOW" = 3; "LOW_MID" = 3; "MID_MID" = 2; "HIGH_LOW" = 2; "LOW_HIGH" = 2; # VRAM 12GB
+};
+↓
+$BATCH_SIZE_TABLE = @{
+	#"LOW_LOW" = 2;
+	"LOW_LOW" = 4; "MID_LOW" = 3; "LOW_MID" = 3; "MID_MID" = 2; "HIGH_LOW" = 2; "LOW_HIGH" = 2; # VRAM 12GB
+};
+```
 - 画像サイズによってdatasetを分けている
+- class_tokensは画像が入っているフォルダ名先頭のカンマやアンダーバーより前
 - フォルダ名に「\_flip\_」や「\_noflip\_」でフリップ有無を切り替え
 - 複数フォルダのドラッグ＆ドロップが可能
 
@@ -439,15 +457,15 @@ LoRAの学習をします。
 
 - batの先頭にコンフィグあり
 	- デフォルトでは「./LoRAImput」に学習用のモデルを置く設定になっています。
-- 引数はロジック、ベースDIM、e-6の整数部で学習率指定、学習ステップ、入力名、出力名、モデル、ClipSkip、継続学習LoRA（省略可）の順で指定
+- 引数はロジック、ベースDIM、e-6の整数部で学習率指定、学習ステップ、入力名、出力名、モデル、VAE、ClipSkip、継続学習LoRA（省略可）の順で指定
 	- ロジックは (Lora3x3|Lora1x1|Locon|Loha)(A1|A50p)-(AdamW8|AdaFactor)の組み合わせ。
 		- A1はアルファ値1、A50pはベースDIMの半分、AdaFactorは学習率を使用しない（がダミーの引数は必要）。
 	- text_encoder_lrはベースDIMの44%を切り捨て。
 
 呼び出し例:
 ```bat
-call LoRA Lora3x3A50p-AdamW8 128 100 1000 4_krnk krnk Defmix-v2.0.safetensors 2
-call LoRA LohaA50p-AdamW8 32 100 1000 4_krnk krnk Defmix-v2.0.safetensors 2
+call LoRA Lora3x3A50p-AdamW8 128 100 1000 4_krnk krnk Defmix-v2.0.safetensors kl-f8-anime2.ckpt 2
+call LoRA LohaA50p-AdamW8 32 100 1000 4_krnk krnk Defmix-v2.0.safetensors kl-f8-anime2.ckpt 2
 ```
 
 実行される学習コマンド例:
@@ -466,6 +484,7 @@ accelerate launch train_network.py^
  --output_dir="..\LoRAOutput\krnk"^
  --output_name=krnk-Lora3x3A50p-AdamW8-128-100-1200^
  --pretrained_model_name_or_path="..\LoRAInput\Defmix-v2.0.safetensors"^
+ --vae="..\LoRAInput\kl-f8-anime2.ckpt"^
  --clip_skip=2^
  --logging_dir="..\LoRALog"
  --log_prefix=krnk-Lora3x3A50p-AdamW8-128-100-1200^
@@ -522,7 +541,17 @@ LoRAの圧縮だけを試してみたい場合は「InstallSdScripts.bat」でsd
 手を動かすことで試してみたいことが次々生まれ、かつ新技術もどんどん出てくるので、時間が足りませんね。
 「試したいことがあまりない」「目新しい新技術がでてこない」といった状況と比べれば、嬉しい悲鳴です。
 
-## ライセンス
+# 更新履歴
+
+## 2023/04/02
+
+- LoRA.batの引数にVAEを追加しました。
+- GenerateCharTagとGenerateCharTomlで複数タグの追加に対応しました。
+- GenerateCharTomlのデフォルトバッチ数を制限しました。
+- GenerateCharTagのfully clothedを付与する仕様を削除しました。
+	- green skinなどでの悪影響のため。
+
+# ライセンス
 
 [MIT License](./LICENSE.txt)です。
 
