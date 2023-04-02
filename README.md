@@ -447,6 +447,10 @@ GenerateCharTagとGenerateCharTomlの両方を呼びます。
 
 [Kohya版LoRAのインストール手順](https://github.com/kohya-ss/sd-scripts/blob/main/README-ja.md#windows%E7%92%B0%E5%A2%83%E3%81%A7%E3%81%AE%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB)と同じことをするbatです。
 
+## UpdateSdScripts.bat
+
+[Kohya版LoRAの更新手順](https://github.com/kohya-ss/sd-scripts/blob/main/README-ja.md#%E3%82%A2%E3%83%83%E3%83%97%E3%82%B0%E3%83%AC%E3%83%BC%E3%83%89)と同じことをするbatです。
+
 ## InstallLyCORIS.bat
 
 [LyCORIS](https://github.com/KohakuBlueleaf/LyCORIS)のインストール手順と同じことをするbatです。
@@ -550,6 +554,7 @@ LoRAの圧縮だけを試してみたい場合は「InstallSdScripts.bat」でsd
 - GenerateCharTomlのデフォルトバッチ数を制限しました。
 - GenerateCharTagのfully clothedを付与する仕様を削除しました。
 	- green skinなどでの悪影響のため。
+- sd-scriptsを更新するUpdateSdScripts.batを追加しました。
 
 # ライセンス
 
